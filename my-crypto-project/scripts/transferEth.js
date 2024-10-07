@@ -4,8 +4,8 @@ async function main() {
     const [sender] = await ethers.getSigners(); 
 
     const tx = await sender.sendTransaction({
-        to: "0xA60293cee06B95E8AA0020DBC4c62c2177d42494",  // Replace with MetaMask address
-        value: ethers.parseEther("10000")  // Transfer 10000 ETH
+        to: "0x7d0C0840c506AAB8ec23129b93aeE77C06267D6D",  // Replace with MetaMask address
+        value: ethers.parseEther("9900")  // Transfer 9900 ETH
     });
 
     await tx.wait();
