@@ -90,6 +90,8 @@ import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { BrowserProvider, Contract, formatEther } from 'ethers';
 import './App.css';
+import tokenSymbolImage from './assets/V.png';
+
 
 function App() {
   const [account, setAccount] = useState(null);
@@ -195,7 +197,12 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>{tokenName || 'Token'} ({tokenSymbol || 'Symbol'}) Interface</h1>
+      <img
+          src={tokenSymbolImage}
+          alt="Token Symbol"
+          className="token-symbol" 
+        />
+        <h1>Interact with {tokenName || 'Token'} ({tokenSymbol || 'Symbol'})</h1>
       </header>
       <main className="App-content">
         <div className="input-container">

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
   background-color: #121212;
@@ -33,7 +37,7 @@ body {
 
 input,
 .transfer-input {
-  width: 100%;
+  width: 97.3%;
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #b0bec5;
@@ -65,9 +69,9 @@ input,
 }
 
 .error {
-  background-color: rgba(137, 243, 54, 0.2);
-  border: 1px solid #89f336;
-  color: #89f336;
+  background-color: rgba(48, 92, 222, 0.2);
+  border: 1px solid #305cde;
+  color: #305cde;
   padding: 10px;
   border-radius: 5px;
   margin: 10px 0;
@@ -98,4 +102,10 @@ input,
 ul {
   list-style-type: none;
   padding: 0;
+}
+
+.token-symbol {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
 }
