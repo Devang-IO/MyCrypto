@@ -1,38 +1,101 @@
+body {
+  margin: 0;
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: "Orbitron", sans-serif;
+}
+
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  background: linear-gradient(45deg, #1a1a1a, #333);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+}
+
+.App-content {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.input-container {
+  margin-bottom: 20px;
+}
+
+input,
+.transfer-input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #b0bec5;
+  border-radius: 5px;
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+  font-family: "Orbitron", sans-serif;
+}
+
+.transfer-button {
+  width: 100%;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
   color: white;
+  cursor: pointer;
+  font-family: "Orbitron", sans-serif;
+  transition: opacity 0.3s ease;
 }
 
-.App-link {
-  color: #61dafb;
+.transfer-button:hover {
+  opacity: 0.9;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.transfer-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 0.2);
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.loading {
+  color: #6a11cb;
+  margin: 10px 0;
+}
+
+.highlight {
+  color: #6a11cb;
+  font-weight: bold;
+}
+
+.transaction-history {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.transaction-item {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
 }

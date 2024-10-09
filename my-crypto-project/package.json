@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "ethers": "^6.13.3"
+    "ethers": "^6.13.3",
+    "framer-motion": "^11.11.7"
   }
 }
