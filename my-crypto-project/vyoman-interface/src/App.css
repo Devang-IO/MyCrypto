@@ -65,9 +65,9 @@ input,
 }
 
 .error {
-  background-color: rgba(255, 0, 0, 0.2);
-  border: 1px solid #ff0000;
-  color: #ff0000;
+  background-color: rgba(137, 243, 54, 0.2);
+  border: 1px solid #89f336;
+  color: #89f336;
   padding: 10px;
   border-radius: 5px;
   margin: 10px 0;
