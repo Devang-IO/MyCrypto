@@ -37,8 +37,6 @@ function App() {
 
         const bal = await vyomanContract.balanceOf(accounts[0]);
         setBalance(formatEther(bal));
-
-        
       } else {
         console.log('Please install MetaMask!');
       }

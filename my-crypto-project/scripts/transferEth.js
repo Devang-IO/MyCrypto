@@ -5,14 +5,14 @@ async function main() {
   const accounts = await ethers.getSigners();
 
   // Specify which Hardhat account to use (e.g., the third account, index 2)
-  const senderIndex = 3;
+  const senderIndex = 1;
   const sender = accounts[senderIndex];
 
   // MetaMask account address (replace with your actual MetaMask address)
-  const receiverAddress = "0xA60293cee06B95E8AA0020DBC4c62c2177d42494";
+  const receiverAddress = "0x040ad562800bF149a137aEcc82A50Ba60248bD58";
 
   // Amount to send in ETH
-  const amountInEth = "1";
+  const amountInEth = "9990";
 
   console.log(`Sender address: ${sender.address}`);
   console.log(`Receiver address: ${receiverAddress}`);
