@@ -12,7 +12,7 @@ async function main() {
   const receiverAddress = "0x040ad562800bF149a137aEcc82A50Ba60248bD58";
 
   // Amount to send in ETH
-  const amountInEth = "9990";
+  const amountInEth = "9999";
 
   console.log(`Sender address: ${sender.address}`);
   console.log(`Receiver address: ${receiverAddress}`);
