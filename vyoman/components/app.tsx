@@ -156,7 +156,9 @@ export function AppComponent() {
           </p>
           {error && (
             <div className="bg-blue-500 bg-opacity-20 border border-blue-500 text-blue-500 p-3 rounded-md">
-              {error}
+              {error.length > 50
+                ? `${error.slice(0, 58)}...${error.slice(-6)}`
+                : error}
             </div>
           )}
           {loading && (
