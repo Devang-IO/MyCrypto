@@ -6,7 +6,7 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   const Vyoman = await hre.ethers.getContractFactory("Vyoman");
-  const vyoman = await Vyoman.deploy("1000000000000000000000000"); // 1 million tokens
+  const vyoman = await Vyoman.deploy("1000000000000000000000000"); // 1 Sextillion Tokens
 
   await vyoman.waitForDeployment();
 

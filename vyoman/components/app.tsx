@@ -1,31 +1,33 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import detectEthereumProvider from '@metamask/detect-provider';
-import { BrowserProvider, Contract, formatEther } from 'ethers';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import detectEthereumProvider from "@metamask/detect-provider";
+import { BrowserProvider, Contract, formatEther } from "ethers";
+import { motion } from "framer-motion";
 
 export function AppComponent() {
   const [account, setAccount] = useState(null);
   const [balance, setBalance] = useState(null);
   const [contract, setContract] = useState(null);
-  const [tokenName, setTokenName] = useState('');
-  const [tokenSymbol, setTokenSymbol] = useState('');
+  const [tokenName, setTokenName] = useState("");
+  const [tokenSymbol, setTokenSymbol] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [transactions, setTransactions] = useState([]);
-  const [contractAddress, setContractAddress] = useState('');
+  const [contractAddress, setContractAddress] = useState("");
 
   useEffect(() => {
     const init = async () => {
       const provider = await detectEthereumProvider();
       if (provider) {
         const ethersProvider = new BrowserProvider(window.ethereum);
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
         setAccount(accounts[0]);
       } else {
-        setError('Please install MetaMask!');
+        setError("Please install MetaMask!");
       }
     };
 
@@ -35,7 +37,7 @@ export function AppComponent() {
   const handleContractAddressChange = async (event) => {
     const address = event.target.value;
     setContractAddress(address);
-    setError('');
+    setError("");
     setLoading(true);
     setContract(null);
 
@@ -44,12 +46,16 @@ export function AppComponent() {
         const provider = await detectEthereumProvider();
         const ethersProvider = new BrowserProvider(window.ethereum);
         const signer = await ethersProvider.getSigner(account);
-        const vyomanContract = new Contract(address, [
-          "function balanceOf(address account) view returns (uint256)",
-          "function transfer(address to, uint256 amount) returns (bool)",
-          "function symbol() view returns (string)",
-          "function name() view returns (string)"
-        ], signer);
+        const vyomanContract = new Contract(
+          address,
+          [
+            "function balanceOf(address account) view returns (uint256)",
+            "function transfer(address to, uint256 amount) returns (bool)",
+            "function symbol() view returns (string)",
+            "function name() view returns (string)",
+          ],
+          signer
+        );
 
         setContract(vyomanContract);
 
@@ -61,11 +67,11 @@ export function AppComponent() {
         const bal = await vyomanContract.balanceOf(account);
         setBalance(formatEther(bal));
       } catch (err) {
-        setError('Failed to load contract. Please check the address.');
-        console.error('Error:', err);
+        setError("Failed to load contract. Please check the address.");
+        console.error("Error:", err);
       }
     } else {
-      setError('Invalid contract address.');
+      setError("Invalid contract address.");
     }
 
     setLoading(false);
@@ -73,19 +79,19 @@ export function AppComponent() {
 
   const handleTransfer = async (event) => {
     event.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const to = event.target.to.value;
     const amountValue = event.target.amount.value;
 
     if (!ethers.isAddress(to)) {
-      setError('Invalid recipient address.');
+      setError("Invalid recipient address.");
       setLoading(false);
       return;
     }
     if (parseFloat(amountValue) <= 0) {
-      setError('Amount must be greater than 0.');
+      setError("Amount must be greater than 0.");
       setLoading(false);
       return;
     }
@@ -102,8 +108,8 @@ export function AppComponent() {
       event.target.reset();
       setError(`Successfully transferred ${amountValue} tokens to ${to}`);
     } catch (err) {
-      setError('Error processing transaction.');
-      console.error('Error:', err);
+      setError("Error processing transaction.");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -111,7 +117,7 @@ export function AppComponent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#121212] to-[#1D1D1D] text-[#e0e0e0] font-['Orbitron',sans-serif] flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -119,7 +125,7 @@ export function AppComponent() {
       >
         <header className="bg-gradient-to-r from-[#1a1a1a] to-[#333] p-6 rounded-t-lg shadow-[0_0_20px_rgba(0,0,0,0.5)]">
           <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-            {tokenName || 'Token'} ({tokenSymbol || 'Symbol'}) Interface
+            {tokenName || "Vyoman"} ({tokenSymbol || "V"}) Interface
           </h1>
         </header>
         <main className="bg-[#1a1a1a] p-6 rounded-b-lg shadow-[0_0_20px_rgba(0,0,0,0.5)] space-y-4">
@@ -131,15 +137,31 @@ export function AppComponent() {
               onChange={handleContractAddressChange}
               className="w-full p-3 bg-[#1f1f1f] border border-[#b0bec5] rounded-md text-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
             />
-            <div 
+            <div
               className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-600 transition-all duration-300"
               style={{ width: `${(contractAddress.length / 42) * 100}%` }}
             />
           </div>
-          <p className="text-left">Your account: <span className="font-mono text-purple-400">{account || 'Not connected'}</span></p>
-          <p className="text-left">Your balance: <span className="font-mono text-purple-400">{balance || '0'} {tokenSymbol}</span></p>
-          {error && <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-500 p-3 rounded-md">{error}</div>}
-          {loading && <div className="animate-pulse text-purple-400">Processing...</div>}
+          <p className="text-left">
+            Your account:{" "}
+            <span className="font-mono text-purple-400">
+              {account || "Not connected"}
+            </span>
+          </p>
+          <p className="text-left">
+            Your balance:{" "}
+            <span className="font-mono text-purple-400">
+              {balance || "0"} {tokenSymbol}
+            </span>
+          </p>
+          {error && (
+            <div className="bg-blue-500 bg-opacity-20 border border-blue-500 text-blue-500 p-3 rounded-md">
+              {error}
+            </div>
+          )}
+          {loading && (
+            <div className="animate-pulse text-purple-400">Processing...</div>
+          )}
           <form onSubmit={handleTransfer} className="space-y-4">
             <input
               type="text"
@@ -169,14 +191,19 @@ export function AppComponent() {
             <h2 className="text-xl font-bold mb-4">Transaction History</h2>
             <ul className="space-y-2">
               {transactions.map((tx, index) => (
-                <motion.li 
+                <motion.li
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
                   className="bg-[#2a2a2a] p-3 rounded-md text-sm"
                 >
-                  Transferred <span className="font-mono text-purple-400">{tx.amount}</span> tokens to <span className="font-mono text-purple-400">{tx.to.slice(0, 6)}...{tx.to.slice(-4)}</span>
+                  Transferred{" "}
+                  <span className="font-mono text-purple-400">{tx.amount}</span>{" "}
+                  tokens to{" "}
+                  <span className="font-mono text-purple-400">
+                    {tx.to.slice(0, 6)}...{tx.to.slice(-4)}
+                  </span>
                 </motion.li>
               ))}
             </ul>
@@ -184,8 +211,8 @@ export function AppComponent() {
         </main>
       </motion.div>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
-        
+        @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap");
+
         body {
           margin: 0;
           padding: 0;
@@ -198,8 +225,13 @@ export function AppComponent() {
         }
 
         @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
         }
 
         .animate-pulse {
