@@ -1,14 +1,30 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ethers } from 'ethers'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Wallet, Send, CreditCard, Activity, RefreshCcw, LogIn, UserPlus, AlertTriangle } from 'lucide-react'
-import { toast, Toaster } from 'react-hot-toast'
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ethers } from "ethers";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Wallet,
+  Send,
+  CreditCard,
+  Activity,
+  RefreshCcw,
+  LogIn,
+  UserPlus,
+  AlertTriangle,
+} from "lucide-react";
+import { toast, Toaster } from "react-hot-toast";
 
 // ABI for Vyoman token
 const VYOMAN_ABI = [
@@ -16,247 +32,339 @@ const VYOMAN_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
   "function symbol() view returns (string)",
   "function name() view returns (string)",
-  "function decimals() view returns (uint8)"
-]
+  "function decimals() view returns (uint8)",
+];
 
 interface User {
-  address: string
-  password: string
+  address: string;
+  password: string;
 }
 
 interface Transaction {
-  hash: string
-  amount: string
-  to: string
-  timestamp: number
+  hash: string;
+  amount: string;
+  to: string;
+  timestamp: number;
 }
 
 export function VyomanDashboardComponent() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [showLogin, setShowLogin] = useState(true)
-  const [users, setUsers] = useState<User[]>([])
-  const [balance, setBalance] = useState<string | null>(null)
-  const [contractAddress, setContractAddress] = useState('')
-  const [contract, setContract] = useState<ethers.Contract | null>(null)
-  const [tokenName, setTokenName] = useState('')
-  const [tokenSymbol, setTokenSymbol] = useState('')
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [showLogin, setShowLogin] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+  const [balance, setBalance] = useState<string | null>(null);
+  const [contractAddress, setContractAddress] = useState("");
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [tokenName, setTokenName] = useState("");
+  const [tokenSymbol, setTokenSymbol] = useState("");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     // Add Orbitron font
-    const link = document.createElement('link')
-    link.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap'
-    link.rel = 'stylesheet'
-    document.head.appendChild(link)
+    const link = document.createElement("link");
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
 
     // Apply the font to the body
-    document.body.style.fontFamily = "'Orbitron', sans-serif"
+    document.body.style.fontFamily = "'Orbitron', sans-serif";
 
     return () => {
-      document.head.removeChild(link)
-      document.body.style.fontFamily = ''
-    }
-  }, [])
+      document.head.removeChild(link);
+      document.body.style.fontFamily = "";
+    };
+  }, []);
 
   const connectWallet = useCallback(async () => {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== "undefined") {
       try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' })
-        const provider = new ethers.BrowserProvider(window.ethereum)
-        const signer = await provider.getSigner()
-        const address = await signer.getAddress()
-        toast.success('Wallet connected successfully!')
-        return address
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        toast.success("Wallet connected successfully!");
+        return address;
       } catch (err) {
-        console.error('Failed to connect wallet:', err)
-        toast.error('Failed to connect wallet. Please try again.')
-        return null
+        console.error("Failed to connect wallet:", err);
+        toast.error("Failed to connect wallet. Please try again.");
+        return null;
       }
     } else {
-      toast.error('MetaMask is not installed. Please install it to use this dApp.')
-      return null
+      toast.error(
+        "MetaMask is not installed. Please install it to use this dApp."
+      );
+      return null;
     }
-  }, [])
+  }, []);
 
   const fetchBalanceAndInfo = useCallback(async () => {
-    if (!currentUser || !contractAddress) return
-    setLoading(true)
-    setError('')
+    if (!currentUser || !contractAddress) return;
+    setLoading(true);
+    setError("");
     try {
-      const address = await connectWallet()
-      if (!address) throw new Error('Failed to connect wallet')
+      const address = await connectWallet();
+      if (!address) throw new Error("Failed to connect wallet");
 
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-      const vyomanContract = new ethers.Contract(contractAddress, VYOMAN_ABI, signer)
-      setContract(vyomanContract)
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const vyomanContract = new ethers.Contract(
+        contractAddress,
+        VYOMAN_ABI,
+        signer
+      );
+      setContract(vyomanContract);
 
-      const name = await vyomanContract.name()
-      const symbol = await vyomanContract.symbol()
-      setTokenName(name)
-      setTokenSymbol(symbol)
+      const name = await vyomanContract.name();
+      const symbol = await vyomanContract.symbol();
+      setTokenName(name);
+      setTokenSymbol(symbol);
 
-      const balance = await vyomanContract.balanceOf(address)
-      const decimals = await vyomanContract.decimals()
-      setBalance(ethers.formatUnits(balance, decimals))
-      toast.success('Contract loaded successfully!')
+      const balance = await vyomanContract.balanceOf(address);
+      const decimals = await vyomanContract.decimals();
+      setBalance(ethers.formatUnits(balance, decimals));
+      toast.success("Contract loaded successfully!");
     } catch (err) {
-      console.error('Error fetching data:', err)
-      setError('Failed to fetch balance and token info: ' + (err instanceof Error ? err.message : String(err)))
-      toast.error('Failed to load contract. Please check the address and try again.')
+      console.error("Error fetching data:", err);
+      setError(
+        "Failed to fetch balance and token info: " +
+          (err instanceof Error ? err.message : String(err))
+      );
+      toast.error(
+        "Failed to load contract. Please check the address and try again."
+      );
     }
-    setLoading(false)
-  }, [currentUser, contractAddress, connectWallet])
+    setLoading(false);
+  }, [currentUser, contractAddress, connectWallet]);
 
   useEffect(() => {
     if (currentUser && contractAddress) {
-      fetchBalanceAndInfo()
+      fetchBalanceAndInfo();
     }
-  }, [currentUser, contractAddress, fetchBalanceAndInfo])
+  }, [currentUser, contractAddress, fetchBalanceAndInfo]);
 
   const handleLogin = async (address: string, password: string) => {
     if (!address || !password) {
-      toast.error('Please fill in all fields')
-      return
+      toast.error("Please fill in all fields");
+      return;
     }
-    const user = users.find(u => u.address.toLowerCase() === address.toLowerCase() && u.password === password)
+    const user = users.find(
+      (u) =>
+        u.address.toLowerCase() === address.toLowerCase() &&
+        u.password === password
+    );
     if (user) {
-      const connectedAddress = await connectWallet()
-      if (connectedAddress && connectedAddress.toLowerCase() === address.toLowerCase()) {
-        setCurrentUser(user)
-        setError('')
-        toast.success('Logged in successfully!')
+      const connectedAddress = await connectWallet();
+      if (
+        connectedAddress &&
+        connectedAddress.toLowerCase() === address.toLowerCase()
+      ) {
+        setCurrentUser(user);
+        setError("");
+        toast.success("Logged in successfully!");
       } else {
-        toast.error('Connected wallet address does not match the provided address')
+        toast.error(
+          "Connected wallet address does not match the provided address"
+        );
       }
     } else {
-      toast.error('Invalid credentials')
+      toast.error("Invalid credentials");
     }
-  }
+  };
 
   const handleSignup = async (address: string, password: string) => {
     if (!address || !password) {
-      toast.error('Please fill in all fields')
-      return
+      toast.error("Please fill in all fields");
+      return;
     }
     if (!ethers.isAddress(address)) {
-      toast.error('Invalid Ethereum address')
-      return
+      toast.error("Invalid Ethereum address");
+      return;
     }
-    if (users.some(u => u.address.toLowerCase() === address.toLowerCase())) {
-      toast.error('Address already exists')
+    if (users.some((u) => u.address.toLowerCase() === address.toLowerCase())) {
+      toast.error("Address already exists");
     } else {
-      const connectedAddress = await connectWallet()
-      if (connectedAddress && connectedAddress.toLowerCase() === address.toLowerCase()) {
-        const newUser = { address, password }
-        setUsers(prevUsers => [...prevUsers, newUser])
-        setCurrentUser(newUser)
-        setError('')
-        toast.success('Signed up successfully!')
+      const connectedAddress = await connectWallet();
+      if (
+        connectedAddress &&
+        connectedAddress.toLowerCase() === address.toLowerCase()
+      ) {
+        const newUser = { address, password };
+        setUsers((prevUsers) => [...prevUsers, newUser]);
+        setCurrentUser(newUser);
+        setError("");
+        toast.success("Signed up successfully!");
       } else {
-        toast.error('Connected wallet address does not match the provided address')
+        toast.error(
+          "Connected wallet address does not match the provided address"
+        );
       }
     }
-  }
+  };
 
   const handleLogout = () => {
-    setCurrentUser(null)
-    setContractAddress('')
-    setContract(null)
-    setBalance(null)
-    setTokenName('')
-    setTokenSymbol('')
-    setError('')
-    toast.success('Logged out successfully!')
-  }
+    setCurrentUser(null);
+    setContractAddress("");
+    setContract(null);
+    setBalance(null);
+    setTokenName("");
+    setTokenSymbol("");
+    setError("");
+    toast.success("Logged out successfully!");
+  };
 
   const handleTransfer = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setError('')
-    setLoading(true)
+    event.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const form = event.target as HTMLFormElement
-    const to = (form.elements.namedItem('to') as HTMLInputElement).value
-    const amount = (form.elements.namedItem('amount') as HTMLInputElement).value
+    const form = event.target as HTMLFormElement;
+    const to = (form.elements.namedItem("to") as HTMLInputElement).value;
+    const amount = (form.elements.namedItem("amount") as HTMLInputElement)
+      .value;
 
     if (!to || !amount) {
-      toast.error('Please fill in all fields')
-      setLoading(false)
-      return
+      toast.error("Please fill in all fields");
+      setLoading(false);
+      return;
     }
 
     if (!ethers.isAddress(to)) {
-      toast.error('Invalid recipient address')
-      setLoading(false)
-      return
+      toast.error("Invalid recipient address");
+      setLoading(false);
+      return;
     }
 
     try {
-      if (!contract) throw new Error('Contract not initialized')
-      const decimals = await contract.decimals()
-      const tx = await contract.transfer(to, ethers.parseUnits(amount, decimals))
-      await tx.wait()
-      await fetchBalanceAndInfo()
-      setTransactions(prevTransactions => [...prevTransactions, { hash: tx.hash, amount, to, timestamp: Date.now() }])
-      form.reset()
-      toast.success('Transfer successful!')
+      if (!contract) throw new Error("Contract not initialized");
+      const decimals = await contract.decimals();
+      const tx = await contract.transfer(
+        to,
+        ethers.parseUnits(amount, decimals)
+      );
+      await tx.wait();
+      await fetchBalanceAndInfo();
+      setTransactions((prevTransactions) => [
+        ...prevTransactions,
+        { hash: tx.hash, amount, to, timestamp: Date.now() },
+      ]);
+      form.reset();
+      toast.success("Transfer successful!");
     } catch (err) {
-      console.error('Error sending transaction:', err)
-      toast.error('Failed to send transaction: ' + (err instanceof Error ? err.message : String(err)))
+      console.error("Error sending transaction:", err);
+      toast.error(
+        "Failed to send transaction: " +
+          (err instanceof Error ? err.message : String(err))
+      );
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const LoginSignupForm = () => (
     <div className="flex items-center justify-center space-x-8">
       <Card className="w-[350px] bg-gray-900 border-gray-800">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-purple-400">
-            {showLogin ? 'Login' : 'Sign Up'}
+            {showLogin ? "Login" : "Sign Up"}
           </CardTitle>
           <CardDescription className="text-gray-400">
-            {showLogin ? 'Access your Vyoman account' : 'Create a new Vyoman account'}
+            {showLogin
+              ? "Access your Vyoman account"
+              : "Create a new Vyoman account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            const form = e.target as HTMLFormElement
-            const address = (form.elements.namedItem('address') as HTMLInputElement).value
-            const password = (form.elements.namedItem('password') as HTMLInputElement).value
-            showLogin ? handleLogin(address, password) : handleSignup(address, password)
-          }} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.target as HTMLFormElement;
+              const address = (
+                form.elements.namedItem("address") as HTMLInputElement
+              ).value;
+              const password = (
+                form.elements.namedItem("password") as HTMLInputElement
+              ).value;
+              showLogin
+                ? handleLogin(address, password)
+                : handleSignup(address, password);
+            }}
+            className="space-y-4"
+          >
             <div className="space-y-2">
-              <Label htmlFor="address" className="text-gray-200">Wallet Address</Label>
-              <Input id="address" name="address" required className="bg-gray-800 text-white border-gray-700" />
+              <Label htmlFor="address" className="text-gray-200">
+                Wallet Address
+              </Label>
+              <Input
+                id="address"
+                name="address"
+                required
+                className="bg-gray-800 text-white border-gray-700"
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-200">Password</Label>
-              <Input id="password" name="password" type="password" required className="bg-gray-800 text-white border-gray-700" />
+              <Label htmlFor="password" className="text-gray-200">
+                Password
+              </Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="bg-gray-800 text-white border-gray-700"
+              />
             </div>
-            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-              {showLogin ? <LogIn className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
-              {showLogin ? 'Login' : 'Sign Up'}
+            <Button
+              type="submit"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {showLogin ? (
+                <LogIn className="mr-2 h-4 w-4" />
+              ) : (
+                <UserPlus className="mr-2 h-4 w-4" />
+              )}
+              {showLogin ? "Login" : "Sign Up"}
             </Button>
           </form>
         </CardContent>
         <CardFooter>
-          <Button variant="link" onClick={() => setShowLogin(!showLogin)} className="w-full text-purple-400 hover:text-purple-300">
-            {showLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
+          <Button
+            variant="link"
+            onClick={() => setShowLogin(!showLogin)}
+            className="w-full text-purple-400 hover:text-purple-300"
+          >
+            {showLogin
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Login"}
           </Button>
         </CardFooter>
       </Card>
       <motion.div
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 0, scale: 0.5, rotateY: 0 }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          rotateY: [0, 360], // Rotate around Y-axis
+        }}
+        transition={{
+          duration: 2, // Duration for the rotation
+          ease: "easeInOut",
+          loop: Infinity, // Infinite loop of the animation
+        }}
+        className="flex justify-center items-center relative"
       >
-        <img src="/vyoman-logo.gif" alt="Vyoman Logo" className="w-64 h-64 object-cover rounded-full" />
+        <img
+          src="/vyoman-logo.gif"
+          alt="Vyoman Logo"
+          className="w-64 h-64 object-cover rounded-full shadow-lg"
+          style={{
+            filter: "drop-shadow(0 0 10px rgba(255, 0, 255, 0.7))", // Glowing effect
+          }}
+        />
+        <div className="absolute inset-0 border-4 border-purple-500 rounded-full animate-pulse"></div>
       </motion.div>
     </div>
-  )
+  );
 
   const Dashboard = () => (
     <motion.div
@@ -266,18 +374,26 @@ export function VyomanDashboardComponent() {
       className="space-y-8"
     >
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-purple-400">Vyoman Token Dashboard</h1>
-        <Button onClick={handleLogout} variant="destructive">Logout</Button>
+        <h1 className="text-3xl font-bold text-purple-400">
+          Vyoman Token Dashboard
+        </h1>
+        <Button onClick={handleLogout} variant="destructive">
+          Logout
+        </Button>
       </div>
 
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-gray-900 border-gray-800 mx-auto max-w-md">
         <CardHeader>
-          <CardTitle className="text-xl text-purple-400">Contract Setup</CardTitle>
+          <CardTitle className="text-xl text-purple-400">
+            Contract Setup
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="contractAddress" className="text-gray-200">Vyoman Contract Address</Label>
+              <Label htmlFor="contractAddress" className="text-gray-200">
+                Vyoman Contract Address
+              </Label>
               <Input
                 id="contractAddress"
                 value={contractAddress}
@@ -286,7 +402,10 @@ export function VyomanDashboardComponent() {
                 className="bg-gray-800 text-white border-gray-700"
               />
             </div>
-            <Button onClick={fetchBalanceAndInfo} className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Button
+              onClick={fetchBalanceAndInfo}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
               Load Contract
             </Button>
           </div>
@@ -302,49 +421,89 @@ export function VyomanDashboardComponent() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-200">Token Balance</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-200">
+                  Token Balance
+                </CardTitle>
                 <Wallet className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-400">{balance ? `${parseFloat(balance).toFixed(4)} ${tokenSymbol}` : 'Loading...'}</div>
+                <div className="text-2xl font-bold text-purple-400">
+                  {balance
+                    ? `${parseFloat(balance).toFixed(4)} ${tokenSymbol}`
+                    : "Loading..."}
+                </div>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-200">Token Name</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-200">
+                  Token Name
+                </CardTitle>
                 <CreditCard className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-400">{tokenName || 'Loading...'}</div>
+                <div className="text-2xl font-bold text-purple-400">
+                  {tokenName || "Loading..."}
+                </div>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-200">Token Symbol</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-200">
+                  Token Symbol
+                </CardTitle>
                 <Activity className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-400">{tokenSymbol || 'Loading...'}</div>
+                <div className="text-2xl font-bold text-purple-400">
+                  {tokenSymbol || "Loading..."}
+                </div>
               </CardContent>
             </Card>
           </div>
 
           <Card className="bg-gray-900 border-gray-800 mt-6">
             <CardHeader>
-              <CardTitle className="text-xl text-purple-400">Transfer Vyoman Tokens</CardTitle>
+              <CardTitle className="text-xl text-purple-400">
+                Transfer Vyoman Tokens
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleTransfer} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="to" className="text-gray-200">Recipient Address</Label>
-                  <Input id="to" name="to" required className="bg-gray-800 text-white border-gray-700" />
+                  <Label htmlFor="to" className="text-gray-200">
+                    Recipient Address
+                  </Label>
+                  <Input
+                    id="to"
+                    name="to"
+                    required
+                    className="bg-gray-800 text-white border-gray-700"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="amount" className="text-gray-200">Amount</Label>
-                  <Input id="amount" name="amount" type="number" step="0.000000000000000001" required  className="bg-gray-800 text-white border-gray-700" />
+                  <Label htmlFor="amount" className="text-gray-200">
+                    Amount
+                  </Label>
+                  <Input
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    step="0.000000000000000001"
+                    required
+                    className="bg-gray-800 text-white border-gray-700"
+                  />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                  {loading ? <RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  {loading ? (
+                    <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
                   Transfer Tokens
                 </Button>
               </form>
@@ -353,7 +512,9 @@ export function VyomanDashboardComponent() {
 
           <Card className="bg-gray-900 border-gray-800 mt-6">
             <CardHeader>
-              <CardTitle className="text-xl text-purple-400">Recent Transactions</CardTitle>
+              <CardTitle className="text-xl text-purple-400">
+                Recent Transactions
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -366,12 +527,20 @@ export function VyomanDashboardComponent() {
                     className="flex items-center justify-between p-2 bg-gray-800 rounded-lg"
                   >
                     <div>
-                      <p className="text-sm font-medium text-purple-400">To: {tx.to.slice(0, 6)}...{tx.to.slice(-4)}</p>
-                      <p className="text-xs text-gray-400">{new Date(tx.timestamp).toLocaleString()}</p>
+                      <p className="text-sm font-medium text-purple-400">
+                        To: {tx.to.slice(0, 6)}...{tx.to.slice(-4)}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(tx.timestamp).toLocaleString()}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-purple-400">{tx.amount} {tokenSymbol}</p>
-                      <p className="text-xs text-gray-400">{tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}</p>
+                      <p className="text-sm font-medium text-purple-400">
+                        {tx.amount} {tokenSymbol}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}
+                      </p>
                     </div>
                   </motion.div>
                 ))}
@@ -392,7 +561,7 @@ export function VyomanDashboardComponent() {
         </motion.div>
       )}
     </motion.div>
-  )
+  );
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-8">
@@ -403,10 +572,14 @@ export function VyomanDashboardComponent() {
         transition={{ duration: 0.5 }}
       >
         <AnimatePresence mode="wait">
-          {currentUser ? <Dashboard key="dashboard" /> : <LoginSignupForm key="login" />}
+          {currentUser ? (
+            <Dashboard key="dashboard" />
+          ) : (
+            <LoginSignupForm key="login" />
+          )}
         </AnimatePresence>
       </motion.div>
       <Toaster position="bottom-right" />
     </div>
-  )
+  );
 }
